@@ -8,10 +8,16 @@
 		{
 			"target_name": "x86-asm-ref",
 			"dependencies": [
-              "deps/sqlite3.gyp:sqlite3",
               "libx86ref"
             ],
 			"sources": [ "x86-asm-ref.cc" ],
+			"conditions": [
+				[ "OS=='win'", {
+					"defines": [
+						"X86_REF_STATIC"
+					]
+				}]
+			],
 			"include_dirs": [
 				"../../libs/intel-x86-ref"
 			],
@@ -22,6 +28,16 @@
 	        'sources': [
 				'../../libs/intel-x86-ref/intel_x86_ref.c'
 	        ],
+	        "conditions": [
+				[ "OS=='win'", {
+					"defines": [
+						"X86_REF_STATIC"
+					]
+				}]
+			],
+	        "dependencies": [
+				"deps/sqlite3.gyp:sqlite3"
+	        ]
 	    }
 	]
 }
