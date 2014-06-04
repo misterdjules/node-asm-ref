@@ -10,7 +10,7 @@
 			"dependencies": [
               "libx86ref"
             ],
-			"sources": [ "x86-asm-ref.cc" ],
+			"sources": [ "addon.cc", "x86asmref.cc" ],
 			"conditions": [
 				[ "OS=='win'", {
 					"defines": [
