@@ -1,7 +1,8 @@
 var X86AsmRef = require('../build/Release/x86-asm-ref');
 var util      = require('util');
+var path	  = require('path');
 
-var officialX86Ref = new X86AsmRef('x86-ref.sqlite');
+var officialX86Ref = new X86AsmRef(path.join(__dirname, 'x86-ref.sqlite'));
 
 officialX86Ref.getAllInstructions(function (err, instructions) {
 	if (err) {
