@@ -1,0 +1,29 @@
+{
+  "name": "node-asm-ref",
+  "version": "0.0.0",
+  "description": "Node.js bindings for asm-ref.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/misterdjules/asm-ref.git"
+  },
+  "keywords": [
+    "ASM",
+    "x86",
+    "bindings"
+  ],
+  "author": "Julien Gilli",
+  "license": "ISC",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/misterdjules/asm-ref/issues"
+  },
+  "homepage": "https://github.com/misterdjules/asm-ref"
+}
