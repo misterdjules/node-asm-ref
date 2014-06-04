@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/misterdjules/asm-ref.git"
+    "url": "https://github.com/misterdjules/node-asm-ref.git"
   },
   "keywords": [
     "ASM",
@@ -23,7 +23,7 @@
   "license": "ISC",
   "gypfile": true,
   "bugs": {
-    "url": "https://github.com/misterdjules/asm-ref/issues"
+    "url": "https://github.com/misterdjules/node-asm-ref/issues"
   },
-  "homepage": "https://github.com/misterdjules/asm-ref"
+  "homepage": "https://github.com/misterdjules/node-asm-ref"
 }
