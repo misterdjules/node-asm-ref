@@ -1,5 +1,5 @@
 {
-	"includes": [ "deps/common-sqlite.gypi" ],
+	"includes": [ "deps/sqlite3/common-sqlite.gypi" ],
 	"variables": {
 		"sqlite%":"internal",
 		"sqlite_libname%":"sqlite3"
@@ -19,14 +19,14 @@
 				}]
 			],
 			"include_dirs": [
-				"../../libs/intel-x86-ref"
+				"deps/asm-ref/libs/intel-x86-ref"
 			],
 		},
 		{
 			'target_name': 'libx86ref',
 	        'type': 'static_library',
 	        'sources': [
-				'../../libs/intel-x86-ref/intel_x86_ref.c'
+				'deps/asm-ref/libs/intel-x86-ref/intel_x86_ref.c'
 	        ],
 	        "conditions": [
 				[ "OS=='win'", {
@@ -36,7 +36,7 @@
 				}]
 			],
 	        "dependencies": [
-				"deps/sqlite3.gyp:sqlite3"
+				"deps/sqlite3/sqlite3.gyp:sqlite3"
 	        ]
 	    }
 	]
