@@ -15,6 +15,14 @@ officialX86Ref.getAllInstructions(function (err, instructions) {
 	}
 });
 
+officialX86Ref.searchInstructionsByMnemonic("A", function (err, instructions) {
+	if (err) {
+		console.log("Couldn't search for instructions with prefix 'A'.");
+	} else {
+		console.dir(instructions);
+	}
+});
+
 officialX86Ref = null;
 global.gc();
 

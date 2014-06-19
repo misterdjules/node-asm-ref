@@ -1,6 +1,7 @@
 #define BUILDING_NODE_EXTENSION
 
 #include <iostream>
+#include <cstring>
 
 #include <node.h>
 
@@ -38,7 +39,20 @@ typedef struct GetInstructionsListBaton
 	X86AsmRef* 						x86AsmRef;
 	v8::Persistent<v8::Function>	callback;
 	instructions_list_t*			instructions;
+	virtual ~GetInstructionsListBaton();
 } GetInstructionsListBaton;
+
+GetInstructionsListBaton::~GetInstructionsListBaton()
+{
+	if (this->instructions)
+		x86_ref_destroy_instructions_list(this->instructions);
+	this->instructions = NULL;
+}
+
+typedef struct SearchByMnemonicBaton : GetInstructionsListBaton
+{
+	std::string prefix;
+} SearchByMnemonicBaton;
 
 v8::Handle<v8::Value> X86AsmRef::GetAllInstructions(const v8::Arguments& args)
 {
@@ -60,6 +74,48 @@ v8::Handle<v8::Value> X86AsmRef::GetAllInstructions(const v8::Arguments& args)
 
 	uv_queue_work(uv_default_loop(),
 				  req, GetInstructionsListWorker,
+				  reinterpret_cast<uv_after_work_cb>(GetInstructionsListDone));
+
+	return scope.Close(v8::Undefined());
+}
+
+v8::Handle<v8::Value> X86AsmRef::SearchInstructionsByMnemonic(const v8::Arguments& args)
+{
+	v8::HandleScope scope;
+
+	assert(args.Length() == 2);
+	if (args.Length() != 2)
+	{
+		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Function requires two parameters.")));
+	}
+
+	assert(args[0]->IsString());
+	if (!args[0]->IsString())
+	{
+		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("First argument must be a string.")));
+	}
+
+	assert(args[1]->IsFunction());
+	if (!args[1]->IsFunction())
+	{
+		return v8::ThrowException(v8::Exception::TypeError(v8::String::New("Second argument must be a callback function.")));
+	}
+
+	uv_work_t* req = new uv_work_t;
+	SearchByMnemonicBaton* baton = new SearchByMnemonicBaton;
+	req->data = baton;
+
+	v8::String::AsciiValue prefix(args[0]->ToString());
+	baton->prefix = std::string(*prefix);
+
+	v8::Local<v8::Function> callback = v8::Local<v8::Function>::Cast(args[1]);
+	baton->callback = v8::Persistent<v8::Function>::New(callback);
+
+	baton->x86AsmRef = ObjectWrap::Unwrap<X86AsmRef>(args.This());
+
+	uv_queue_work(uv_default_loop(),
+				  req,
+				  SearchInstructionsByMnemonicWorker,
 				  reinterpret_cast<uv_after_work_cb>(GetInstructionsListDone));
 
 	return scope.Close(v8::Undefined());
@@ -95,6 +151,34 @@ void X86AsmRef::GetInstructionsListWorker(uv_work_t* req)
 	instructionsListBaton->instructions = x86_ref_get_all_instructions(refDb);
 }
 
+void X86AsmRef::SearchInstructionsByMnemonicWorker(uv_work_t* req)
+{
+	assert(req);
+	assert(req->data);
+
+	if (!req || !req->data)
+		return;
+
+	SearchByMnemonicBaton* baton = reinterpret_cast<SearchByMnemonicBaton*>(req->data);
+
+	X86AsmRef* ref = baton->x86AsmRef;
+	assert(ref);
+	if (!ref)
+		return;
+
+	ref_database_t* refDb = ref->GetRefDb();
+	if (!refDb)
+	{
+		refDb = x86_ref_open_database(ref->GetDbPath().c_str());
+		assert(refDb);
+		if (!refDb)
+			return;
+		ref->SetRefDb(refDb);
+	}
+
+	baton->instructions = x86_ref_search_instructions_by_mnemonic(refDb, baton->prefix.c_str());
+}
+
 void X86AsmRef::GetInstructionsListDone(uv_work_t* req)
 {
 	v8::HandleScope scope;
@@ -122,9 +206,6 @@ void X86AsmRef::GetInstructionsListDone(uv_work_t* req)
 	baton->callback->Call(v8::Context::GetCurrent()->Global(), argc, argv);
 	baton->callback.Dispose();
 
-	x86_ref_destroy_instructions_list(baton->instructions);
-	baton->instructions = NULL;
-
 	delete baton;
 	delete req;
 }
@@ -134,8 +215,14 @@ void X86AsmRef::Init(v8::Handle<v8::Object> exports, v8::Handle<v8::Object> modu
 	v8::Local<v8::FunctionTemplate> constructorTpl = v8::FunctionTemplate::New(New);
 	constructorTpl->SetClassName(v8::String::NewSymbol("X86AsmRef"));
 	constructorTpl->InstanceTemplate()->SetInternalFieldCount(2);
+
 	v8::Local<v8::Function> getAllInstructionFunc = v8::FunctionTemplate::New(GetAllInstructions)->GetFunction();
 	constructorTpl->PrototypeTemplate()->Set(v8::String::NewSymbol("getAllInstructions"),
 											 getAllInstructionFunc);
+
+	v8::Local<v8::Function> searchInstructionsByMnemonicFunc = v8::FunctionTemplate::New(SearchInstructionsByMnemonic)->GetFunction();
+	constructorTpl->PrototypeTemplate()->Set(v8::String::NewSymbol("searchInstructionsByMnemonic"),
+											 searchInstructionsByMnemonicFunc);
+
 	module->Set(v8::String::NewSymbol("exports"), constructorTpl->GetFunction());
 }
