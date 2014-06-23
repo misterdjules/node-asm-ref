@@ -195,7 +195,13 @@ void X86AsmRef::GetInstructionsListDone(uv_work_t* req)
 		while ((instruction = x86_ref_next_instruction_from_list(&instructionsList)) != NULL)
 		{
 			v8::Local<v8::String> instructionMnemonic = v8::String::New(x86_ref_get_instruction_mnemonic(instruction));
-			array->Set(currentIndex, instructionMnemonic);
+			v8::Local<v8::String> instructionSynopsis = v8::String::New(x86_ref_get_instruction_synopsis(instruction));
+
+			v8::Local<v8::Object> instructionObject = v8::Object::New();
+			instructionObject->Set(v8::String::New("mnemonic"), instructionMnemonic);
+			instructionObject->Set(v8::String::New("synopsis"), instructionSynopsis);
+
+			array->Set(currentIndex, instructionObject);
 			++currentIndex;
 		}
 	}
