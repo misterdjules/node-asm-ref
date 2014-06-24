@@ -26,11 +26,15 @@ private:
 
 	static v8::Handle<v8::Value> GetAllInstructions(const v8::Arguments& args);
 	static v8::Handle<v8::Value> SearchInstructionsByMnemonic(const v8::Arguments& args);
+	static v8::Handle<v8::Value> GetInstructionByMnemonic(const v8::Arguments& args);
 
 	static void GetInstructionsListWorker(uv_work_t* req);
 	static void GetInstructionsListDone(uv_work_t* req);
 
 	static void SearchInstructionsByMnemonicWorker(uv_work_t* req);
+
+	static void GetInstructionByMnemonicWorker(uv_work_t* req);
+	static void GetInstructionByMnemonicDone(uv_work_t* req);
 
 	const std::string 	m_dbPath;
 	ref_database_t*		m_refDb;
