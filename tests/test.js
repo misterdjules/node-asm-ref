@@ -9,9 +9,6 @@ officialX86Ref.getAllInstructions(function (err, instructions) {
 		console.log('Couldn\'t get all instructions from database.');
 	} else {
 		console.dir(instructions);
-		instructions.forEach(function (instruction) {
-			console.log(instruction);
-		});
 	}
 });
 
