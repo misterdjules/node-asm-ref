@@ -325,17 +325,41 @@ void X86AsmRef::GetInstructionByMnemonicDone(uv_work_t* req)
 	if (baton && baton->instruction)
 	{
 		instruction_t* instruction = baton->instruction;
-
-		v8::Local<v8::String> mnemonicString  = v8::String::New(x86_ref_get_instruction_mnemonic(instruction));
-		v8::Local<v8::String> synopsisString  = v8::String::New(x86_ref_get_instruction_synopsis(instruction));
-		v8::Local<v8::String> shortDescString = v8::String::New(x86_ref_get_instruction_short_desc(instruction));
-		v8::Local<v8::String> longDescString  = v8::String::New(x86_ref_get_instruction_long_desc(instruction));
-
 		v8::Persistent<v8::Object> instructionObject = v8::Persistent<v8::Object>::New(v8::Object::New());
-		instructionObject->Set(v8::String::New("mnemonic"), 	mnemonicString);
-		instructionObject->Set(v8::String::New("synopsis"), 	synopsisString);
-		instructionObject->Set(v8::String::New("short_desc"), 	shortDescString);
-		instructionObject->Set(v8::String::New("long_desc"), 	longDescString);
+
+		const char* mnemonic = x86_ref_get_instruction_mnemonic(instruction);
+		if (mnemonic)
+		{
+			instructionObject->Set(v8::String::New("mnemonic"),
+								   v8::String::New(mnemonic));
+		}
+		const char* synopsis = x86_ref_get_instruction_synopsis(instruction);
+		if (synopsis)
+		{
+			instructionObject->Set(v8::String::New("synopsis"),
+								   v8::String::New(synopsis));
+		}
+
+		const char* shortDesc = x86_ref_get_instruction_short_desc(instruction);
+		if (shortDesc)
+		{
+			instructionObject->Set(v8::String::New("shortDescription"),
+								   v8::String::New(shortDesc));
+		}
+
+		const char* longDesc = x86_ref_get_instruction_long_desc(instruction);
+		if (longDesc)
+		{
+			instructionObject->Set(v8::String::New("longDescription"),
+								   v8::String::New(longDesc));
+		}
+
+		const char* affectedFlags = x86_ref_get_instruction_affected_flags(instruction);
+		if (affectedFlags)
+		{
+			instructionObject->Set(v8::String::New("affectedFlags"),
+								   v8::String::New(affectedFlags));
+		}
 
 		argv[1] = instructionObject;
 	}
